@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <!-- Copyright (c) Microsoft Corporation. -->
     <!-- SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception -->
-    <title>STL Status Chart</title>
+    <title>vcpkg Status Chart</title>
     <style>
         body {
             font-family: sans-serif;
@@ -32,7 +32,6 @@
         src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@1.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"
         integrity="sha256-OrN9od558nPowCwU4e475a5CCwTfCwSrk7TF7KYUoXk=" crossorigin="anonymous"></script>
     <script src="daily_table.js"></script>
-    <script src="weekly_table.js"></script>
     <script>
         function get_values(table, key) {
             return table.filter(row => row[key] !== undefined).map(row => ({ x: row.date, y: row[key] }));
@@ -41,27 +40,6 @@
         const status_data = {
             datasets: [
                 {
-                    data: get_values(weekly_table, 'cxx17'),
-                    label: 'C++17 Features',
-                    borderColor: '#9966FF',
-                    backgroundColor: '#9966FF',
-                    yAxisID: 'smallAxis',
-                },
-                {
-                    data: get_values(weekly_table, 'cxx20').concat(get_values(daily_table, 'cxx20')),
-                    label: 'C++20 Features',
-                    borderColor: '#7030A0',
-                    backgroundColor: '#7030A0',
-                    yAxisID: 'smallAxis',
-                },
-                {
-                    data: get_values(weekly_table, 'lwg').concat(get_values(daily_table, 'lwg')),
-                    label: 'LWG Resolutions',
-                    borderColor: '#0070C0',
-                    backgroundColor: '#0070C0',
-                    yAxisID: 'smallAxis',
-                },
-                {
                     data: get_values(daily_table, 'pr'),
                     label: 'Pull Requests',
                     borderColor: '#00B050',
@@ -69,31 +47,17 @@
                     yAxisID: 'smallAxis',
                 },
                 {
-                    data: get_values(weekly_table, 'vso'),
-                    label: 'Old Bugs',
-                    borderColor: '#900000',
-                    backgroundColor: '#900000',
-                    yAxisID: 'largeAxis',
-                },
-                {
                     data: get_values(daily_table, 'bug'),
-                    label: 'GitHub Bugs',
+                    label: 'Bugs',
                     borderColor: '#FF0000',
                     backgroundColor: '#FF0000',
-                    yAxisID: 'largeAxis',
+                    yAxisID: 'smallAxis',
                 },
                 {
                     data: get_values(daily_table, 'issue'),
-                    label: 'GitHub Issues',
+                    label: 'Issues',
                     borderColor: '#909090',
                     backgroundColor: '#909090',
-                    yAxisID: 'largeAxis',
-                },
-                {
-                    data: get_values(weekly_table, 'libcxx'),
-                    label: 'Skipped Libcxx Tests',
-                    borderColor: '#FFC000',
-                    backgroundColor: '#FFC000',
                     yAxisID: 'largeAxis',
                 },
             ],
@@ -147,16 +111,16 @@
         };
 
         const timeframe_all = {
-            ticks: { min: '2017-06-09' },
+            ticks: { min: '2016-09-18' },
             time: { unit: 'quarter' },
         };
-        const timeframe_github = {
-            ticks: { min: '2019-09-20' }, // first Friday after 2019-09-16
+        const timeframe_year = {
+            ticks: { min: '2019-08-01' },
             time: { unit: 'month' },
         };
         const timeframes = [
             timeframe_all,
-            timeframe_github,
+            timeframe_year,
         ];
         let timeframe_idx = 0;
 
@@ -210,7 +174,7 @@
             ...common_options,
             title: {
                 ...common_title,
-                text: 'STL Status Chart',
+                text: 'vcpkg Status Chart',
             },
             scales: {
                 xAxes: make_xAxes(timeframe_all),
@@ -222,11 +186,11 @@
                         position: 'left',
                         scaleLabel: {
                             display: true,
-                            labelString: 'Bugs, Issues, Skipped Libcxx Tests',
+                            labelString: 'Issues',
                         },
                         ticks: {
                             min: 0,
-                            max: 650,
+                            max: 1600,
                             stepSize: 100,
                         },
                     },
@@ -237,12 +201,12 @@
                         position: 'right',
                         scaleLabel: {
                             display: true,
-                            labelString: 'Features, LWG Resolutions, Pull Requests',
+                            labelString: 'Pull Requests, Bugs',
                         },
                         ticks: {
                             min: 0,
-                            max: 65,
-                            stepSize: 10,
+                            max: 320,
+                            stepSize: 20,
                         },
                     },
                 ],
@@ -256,7 +220,7 @@
                 text: 'Pull Request Age',
             },
             scales: {
-                xAxes: make_xAxes(timeframe_github),
+                xAxes: make_xAxes(timeframe_all),
                 yAxes: [
                     {
                         type: 'linear',
@@ -269,8 +233,8 @@
                         },
                         ticks: {
                             min: 0,
-                            max: 80,
-                            stepSize: 10,
+                            max: 220,
+                            stepSize: 20,
                         },
                     },
                     {
@@ -284,8 +248,8 @@
                         },
                         ticks: {
                             min: 0,
-                            max: 80,
-                            stepSize: 10,
+                            max: 1100,
+                            stepSize: 100,
                         },
                     },
                 ],
@@ -302,7 +266,7 @@
                 display: false,
             },
             scales: {
-                xAxes: make_xAxes(timeframe_github),
+                xAxes: make_xAxes(timeframe_all),
                 yAxes: [
                     {
                         type: 'linear',
@@ -315,8 +279,8 @@
                         },
                         ticks: {
                             min: 0,
-                            max: 80,
-                            stepSize: 10,
+                            max: 280,
+                            stepSize: 20,
                         },
                     },
                 ],
@@ -345,23 +309,20 @@
             document.getElementById('toggleTimeframe').addEventListener('click', function () {
                 timeframe_idx = (timeframe_idx + 1) % timeframes.length;
 
-                const xAxis = window.status_chart.options.scales.xAxes[0];
                 const new_timeframe = timeframes[timeframe_idx];
 
-                xAxis.ticks.min = new_timeframe.ticks.min;
-                xAxis.time.unit = new_timeframe.time.unit;
+                for (const chart of ['status_chart', 'age_chart', 'merge_chart']) {
+                    const xAxis = window[chart].options.scales.xAxes[0];
 
-                window.status_chart.update();
+                    xAxis.ticks.min = new_timeframe.ticks.min;
+                    xAxis.time.unit = new_timeframe.time.unit;
+
+                    window[chart].update();
+                }
             });
 
-            for (const field of ['cxx20', 'lwg', 'pr', 'bug', 'issue', 'avg_age', 'avg_wait', 'sum_age', 'sum_wait',
-                'merged']) {
+            for (const field of ['pr', 'bug', 'issue', 'avg_age', 'avg_wait', 'sum_age', 'sum_wait', 'merged']) {
                 const value = daily_table[daily_table.length - 1][field];
-                document.getElementById(`currentValue-${field}`).textContent = value;
-            }
-
-            for (const field of ['vso', 'libcxx']) {
-                const value = weekly_table[weekly_table.length - 1][field];
                 document.getElementById(`currentValue-${field}`).textContent = value;
             }
         };
@@ -370,11 +331,10 @@
 
 <body>
     <canvas id="statusChart"></canvas>
-    <button id="toggleTimeframe">Toggle Timeframe: All/GitHub</button>
+    <button id="toggleTimeframe">Toggle Timeframe: All/Recent</button>
 
     <h1>Explanation</h1>
-    <p>This tracks the progress of the <a href="https://github.com/microsoft/STL">microsoft/STL</a> repo.
-        For more info, read the <a href="https://github.com/microsoft/STL/wiki/Changelog">Changelog</a>.</p>
+    <p>This tracks the progress of the <a href="https://github.com/microsoft/vcpkg">microsoft/vcpkg</a> repo.</p>
 
     <p>This chart is interactive! Click the legend to show/hide lines.</p>
 
@@ -383,49 +343,21 @@
     <ul>
         <li>Right axis:
             <ul>
-                <li>(<span class="currentValue">0</span>)
-                    C++17 STL features remaining to be implemented. This reached zero when we implemented
-                    <a href="https://www.reddit.com/r/cpp/comments/dgj89g/cppcon_2019_stephan_t_lavavej_floatingpoint/"
-                        rel="nofollow"><code>&lt;charconv&gt;</code>, C++17's final boss</a>.</li>
-                <li>(<span class="currentValue" id="currentValue-cxx20"></span>)
-                    <a href="https://github.com/microsoft/STL/issues?q=is%3Aopen+is%3Aissue+label%3Acxx20">
-                        C++20 STL features remaining to be implemented.</a>
-                    This increased whenever more features were voted into the Working Paper at
-                    <a href="https://isocpp.org/std/meetings-and-participation" rel="nofollow">WG21 meetings</a>.</li>
-                <li>(<span class="currentValue" id="currentValue-lwg"></span>) <a
-                        href="https://github.com/microsoft/STL/issues?q=is%3Aopen+is%3Aissue+label%3ALWG+-label%3AvNext+-label%3Ablocked">
-                        LWG issue resolutions remaining to be implemented.</a> Also increases after WG21 meetings.</li>
                 <li>(<span class="currentValue" id="currentValue-pr"></span>)
-                    <a href="https://github.com/microsoft/STL/pulls">Open pull requests.</a></li>
+                    <a href="https://github.com/microsoft/vcpkg/pulls">Open pull requests.</a></li>
+                <li>(<span class="currentValue" id="currentValue-bug"></span>) <a
+                        href="https://github.com/microsoft/vcpkg/issues?q=is%3Aopen+is%3Aissue+label%3Acategory%3Avcpkg-bug">
+                        Open bugs.</a> That is, only issues labeled as <b>category:vcpkg-bug</b>.</li>
             </ul>
         </li>
         <li>Left axis:
             <ul>
-                <li>(<span class="currentValue" id="currentValue-vso"></span>)
-                    Active "old bugs" in our Microsoft-internal database. We're keeping them active while
-                    porting them to GitHub, unless they're discovered to be duplicates or already fixed.</li>
-                <li>(<span class="currentValue" id="currentValue-bug"></span>)
-                    <a href="https://github.com/microsoft/STL/issues?q=is%3Aopen+is%3Aissue+label%3Abug">
-                        Open GitHub bugs.</a> That is, only GitHub issues that have <b>bug</b> labels.</li>
                 <li>(<span class="currentValue" id="currentValue-issue"></span>)
-                    <a href="https://github.com/microsoft/STL/issues?q=is%3Aopen+is%3Aissue+-label%3Acxx20">
-                        Open GitHub issues.</a> That is, all GitHub issues including <b>bug</b>,
-                    <b>documentation</b>, <b>enhancement</b>, <b>performance</b>, <b>throughput</b>, etc.
-                    and excluding only <b>cxx20</b> and <b>LWG</b> to avoid double-counting.</li>
-                <li>(<span class="currentValue" id="currentValue-libcxx"></span>)
-                    <a href="https://github.com/microsoft/STL/blob/master/tests/libcxx/skipped_tests.txt">
-                        Skipped tests in the libcxx test suite.</a> There are many reasons for skipped tests:
-                    STL bugs, test bugs, compiler bugs, missing STL features, missing compiler features, etc.
-                    To avoid double-counting, this chart excludes skipped tests due to missing STL features.</li>
+                    <a href="https://github.com/microsoft/vcpkg/issues">Open issues.</a>
+                    That is, all issues including <b>category:vcpkg-bug</b>.</li>
             </ul>
         </li>
     </ul>
-
-    <p>We don't count "patch papers" as extra work when one paper adds a feature
-        and another paper modifies that feature before we've implemented it.</p>
-
-    <p>This chart weights features equally, instead of weighting
-        by usefulness for users or difficulty for implementers.</p>
 
     <hr />
 
@@ -466,7 +398,7 @@
                 <li>(<span class="currentValue" id="currentValue-merged"></span>)
                     How many PRs have been merged into any branch over the past month.
                     This uses a sliding window of 30 days, without any smoothing.
-                    It excludes PRs that were closed without being merged, which are rare.</li>
+                    It excludes PRs that were closed without being merged.</li>
             </ul>
         </li>
     </ul>
@@ -474,6 +406,8 @@
     <hr />
 
     <p>Powered by <a href="https://www.chartjs.org/">Chart.js</a>.</p>
+
+    <p>Originally developed for the <a href="https://github.com/microsoft/STL">microsoft/STL</a> repo.</p>
 
 </body>
 

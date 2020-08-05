@@ -232,9 +232,7 @@ function transform_issue_nodes(issue_nodes) {
             number: node.number,
             opened: DateTime.fromISO(node.createdAt),
             closed: DateTime.fromISO(node.closedAt ?? '2100-01-01'),
-            labeled_cxx20: labels.includes('cxx20'),
-            labeled_lwg: labels.includes('LWG') && !labels.includes('vNext') && !labels.includes('blocked'),
-            labeled_bug: labels.includes('bug'),
+            labeled_bug: labels.includes('category:vcpkg-bug'),
         };
     });
 }
@@ -257,7 +255,7 @@ function write_daily_table(script_start, all_prs, all_issues) {
         str += generated_file_warning_comment;
         str += 'const daily_table = [\n';
 
-        const begin = DateTime.fromISO('2019-09-05' + 'T23:00:00-07');
+        const begin = DateTime.fromISO('2016-09-18' + 'T23:00:00-07');
 
         progress_bar.start(Math.ceil(script_start.diff(begin).as('days')), 0);
 
@@ -265,8 +263,6 @@ function write_daily_table(script_start, all_prs, all_issues) {
             const one_month_ago = when.minus({ months: 1 });
             let num_merged = 0;
             let num_pr = 0;
-            let num_cxx20 = 0;
-            let num_lwg = 0;
             let num_issue = 0;
             let num_bug = 0;
             let combined_pr_age = Duration.fromObject({});
@@ -289,12 +285,6 @@ function write_daily_table(script_start, all_prs, all_issues) {
             for (const issue of all_issues) {
                 if (when < issue.opened || issue.closed < when) {
                     // This issue wasn't active; do nothing.
-                } else if (issue.labeled_cxx20) {
-                    // Avoid double-counting C++20 Features and GitHub Issues.
-                    ++num_cxx20;
-                } else if (issue.labeled_lwg) {
-                    // Avoid double-counting LWG Resolutions and GitHub Issues.
-                    ++num_lwg;
                 } else {
                     ++num_issue;
 
@@ -314,8 +304,6 @@ function write_daily_table(script_start, all_prs, all_issues) {
                 `date: '${when.toISODate()}'`,
                 `merged: ${num_merged}`,
                 `pr: ${num_pr}`,
-                `cxx20: ${num_cxx20}`,
-                `lwg: ${num_lwg}`,
                 `issue: ${num_issue}`,
                 `bug: ${num_bug}`,
                 `avg_age: ${Number.parseFloat(avg_age).toFixed(2)}`,
