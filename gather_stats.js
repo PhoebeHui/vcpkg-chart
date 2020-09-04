@@ -14,7 +14,7 @@ const { graphql } = require('@octokit/graphql');
     if (result.error) {
         throw result.error;
     }
-
+    console.log(process.env);
     if (process.env.SECRET_GITHUB_PERSONAL_ACCESS_TOKEN === undefined) {
         throw 'Missing SECRET_GITHUB_PERSONAL_ACCESS_TOKEN key in .env file.';
     }
@@ -197,12 +197,13 @@ function transform_pr_nodes(pr_nodes) {
                 return is_maintainer;
             })
             .map(review_node => DateTime.fromISO(review_node.submittedAt));
+            console.log(pr_node.closedAt)
 
         return {
             number: pr_node.number,
             opened: DateTime.fromISO(pr_node.createdAt),
-            closed: DateTime.fromISO(pr_node.closedAt ?? '2100-01-01'),
-            merged: DateTime.fromISO(pr_node.mergedAt ?? '2100-01-01'),
+            closed: DateTime.fromISO(pr_node.closedAt),
+            merged: DateTime.fromISO(pr_node.mergedAt),
             reviews: maintainer_reviews,
         };
     });
@@ -231,8 +232,9 @@ function transform_issue_nodes(issue_nodes) {
         return {
             number: node.number,
             opened: DateTime.fromISO(node.createdAt),
-            closed: DateTime.fromISO(node.closedAt ?? '2100-01-01'),
-            labeled_bug: labels.includes('category:vcpkg-bug'),
+            closed: DateTime.fromISO(node.closedAt),
+            labeled_vcpkg_bug: labels.includes('category:vcpkg-bug'),
+            labeled_port_bug: labels.includes('category:port-bug'),
         };
     });
 }
@@ -255,7 +257,7 @@ function write_daily_table(script_start, all_prs, all_issues) {
         str += generated_file_warning_comment;
         str += 'const daily_table = [\n';
 
-        const begin = DateTime.fromISO('2016-09-18' + 'T23:00:00-07');
+        const begin = DateTime.fromISO('2020-01-01' + 'T23:00:00-07');
 
         progress_bar.start(Math.ceil(script_start.diff(begin).as('days')), 0);
 
@@ -264,7 +266,8 @@ function write_daily_table(script_start, all_prs, all_issues) {
             let num_merged = 0;
             let num_pr = 0;
             let num_issue = 0;
-            let num_bug = 0;
+            let num_vcpkg_bug = 0;
+            let num_port_bug = 0;
             let combined_pr_age = Duration.fromObject({});
             let combined_pr_wait = Duration.fromObject({});
 
@@ -288,9 +291,13 @@ function write_daily_table(script_start, all_prs, all_issues) {
                 } else {
                     ++num_issue;
 
-                    if (issue.labeled_bug) {
-                        ++num_bug;
+                    if (issue.labeled_vcpkg_bug) {
+                        ++num_vcpkg_bug;
                     }
+                    if (issue.labeled_port_bug) {
+                        ++num_port_bug;
+                    }
+                    
                 }
             }
 
@@ -305,7 +312,8 @@ function write_daily_table(script_start, all_prs, all_issues) {
                 `merged: ${num_merged}`,
                 `pr: ${num_pr}`,
                 `issue: ${num_issue}`,
-                `bug: ${num_bug}`,
+                `vcpkg_bug: ${num_vcpkg_bug}`,
+                `port_bug: ${num_port_bug}`,
                 `avg_age: ${Number.parseFloat(avg_age).toFixed(2)}`,
                 `avg_wait: ${Number.parseFloat(avg_wait).toFixed(2)}`,
                 `sum_age: ${Number.parseFloat(sum_age).toFixed(2)}`,

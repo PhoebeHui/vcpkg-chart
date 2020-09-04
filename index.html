@@ -40,17 +40,17 @@
         const status_data = {
             datasets: [
                 {
-                    data: get_values(daily_table, 'pr'),
-                    label: 'Pull Requests',
-                    borderColor: '#00B050',
-                    backgroundColor: '#00B050',
+                    data: get_values(daily_table, 'vcpkg_bug'),
+                    label: 'Vcpkg_Bugs',
+                    borderColor: '#FF7F50',
+                    backgroundColor: '#FF7F50',
                     yAxisID: 'smallAxis',
                 },
                 {
-                    data: get_values(daily_table, 'bug'),
-                    label: 'Bugs',
-                    borderColor: '#FF0000',
-                    backgroundColor: '#FF0000',
+                    data: get_values(daily_table, 'port_bug'),
+                    label: 'Port_Bugs',
+                    borderColor: '#00BFFF',
+                    backgroundColor: '#00BFFF',
                     yAxisID: 'smallAxis',
                 },
                 {
@@ -84,15 +84,15 @@
                 {
                     data: get_values(daily_table, 'sum_age'),
                     label: 'Combined Age',
-                    borderColor: '#000000',
-                    backgroundColor: '#000000',
+                    borderColor: '#909090',
+                    backgroundColor: '#909090',
                     yAxisID: 'rightAxis',
                 },
                 {
                     data: get_values(daily_table, 'sum_wait'),
                     label: 'Combined Wait',
-                    borderColor: '#FF0000',
-                    backgroundColor: '#FF0000',
+                    borderColor: '#FF7F50',
+                    backgroundColor: '#FF7F50',
                     yAxisID: 'rightAxis',
                 },
             ],
@@ -100,6 +100,13 @@
 
         const merge_data = {
             datasets: [
+                {
+                    data: get_values(daily_table, 'pr'),
+                    label: 'Pull Requests',
+                    borderColor: '#909090',
+                    backgroundColor: '#909090',
+                    yAxisID: 'smallAxis',
+                },
                 {
                     data: get_values(daily_table, 'merged'),
                     label: 'Monthly Merged PRs',
@@ -111,11 +118,11 @@
         };
 
         const timeframe_all = {
-            ticks: { min: '2016-09-18' },
+            ticks: { min: '2020-01-01' },
             time: { unit: 'quarter' },
         };
         const timeframe_year = {
-            ticks: { min: '2019-08-01' },
+            ticks: { min: '2020-01-01' },
             time: { unit: 'month' },
         };
         const timeframes = [
@@ -174,7 +181,7 @@
             ...common_options,
             title: {
                 ...common_title,
-                text: 'vcpkg Status Chart',
+                text: 'VCPKG Status Chart',
             },
             scales: {
                 xAxes: make_xAxes(timeframe_all),
@@ -201,7 +208,7 @@
                         position: 'right',
                         scaleLabel: {
                             display: true,
-                            labelString: 'Pull Requests, Bugs',
+                            labelString: 'Vcpkg_Bugs, Port_Bugs',
                         },
                         ticks: {
                             min: 0,
@@ -260,14 +267,26 @@
             ...common_options,
             title: {
                 ...common_title,
-                text: 'Monthly Merged PRs',
-            },
-            legend: {
-                display: false,
+                text: 'Pull Requests Status',
             },
             scales: {
                 xAxes: make_xAxes(timeframe_all),
                 yAxes: [
+		{
+                        type: 'linear',
+                        display: 'auto',
+                        id: 'smallAxis',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Total PRs / month',
+                        },
+                        ticks: {
+                            min: 0,
+                            max: 320,
+                            stepSize: 20,
+                        },
+                    },
                     {
                         type: 'linear',
                         display: 'auto',
@@ -275,11 +294,11 @@
                         position: 'right',
                         scaleLabel: {
                             display: true,
-                            labelString: 'PRs / month',
+                            labelString: 'Merged PRs / month',
                         },
                         ticks: {
                             min: 0,
-                            max: 280,
+                            max: 320,
                             stepSize: 20,
                         },
                     },
@@ -321,7 +340,7 @@
                 }
             });
 
-            for (const field of ['pr', 'bug', 'issue', 'avg_age', 'avg_wait', 'sum_age', 'sum_wait', 'merged']) {
+            for (const field of ['pr', 'vcpgk_bug', 'port_bug', 'issue', 'avg_age', 'avg_wait', 'sum_age', 'sum_wait', 'merged']) {
                 const value = daily_table[daily_table.length - 1][field];
                 document.getElementById(`currentValue-${field}`).textContent = value;
             }
