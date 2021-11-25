@@ -197,13 +197,14 @@ function transform_pr_nodes(pr_nodes) {
                 return is_maintainer;
             })
             .map(review_node => DateTime.fromISO(review_node.submittedAt));
-            console.log(pr_node.closedAt)
+            //console.log(pr_node.closedAt)
 
         return {
             number: pr_node.number,
             opened: DateTime.fromISO(pr_node.createdAt),
             closed: DateTime.fromISO(pr_node.closedAt),
             merged: DateTime.fromISO(pr_node.mergedAt),
+            draft:  pr_node.isDraft,
             reviews: maintainer_reviews,
         };
     });
@@ -272,16 +273,20 @@ function write_daily_table(script_start, all_prs, all_issues) {
             let combined_pr_wait = Duration.fromObject({});
 
             for (const pr of all_prs) {
-                if (one_month_ago < pr.merged && pr.merged < when) {
-                    ++num_merged;
+                if(pr.draft) {
                 }
+                else {
+                    if (one_month_ago < pr.merged && pr.merged < when) {
+                        ++num_merged;
+                    }
 
-                if (when < pr.opened || pr.closed < when) {
-                    // This PR wasn't active; do nothing.
-                } else {
-                    ++num_pr;
-                    combined_pr_age = combined_pr_age.plus(when.diff(pr.opened));
-                    combined_pr_wait = combined_pr_wait.plus(calculate_wait(when, pr.opened, pr.reviews));
+                    if (when < pr.opened || pr.closed < when) {
+                        // This PR wasn't active; do nothing.
+                    } else {
+                        ++num_pr;
+                        combined_pr_age = combined_pr_age.plus(when.diff(pr.opened));
+                        combined_pr_wait = combined_pr_wait.plus(calculate_wait(when, pr.opened, pr.reviews));
+                    }
                 }
             }
 
