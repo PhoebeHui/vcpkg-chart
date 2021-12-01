@@ -273,19 +273,19 @@ function write_daily_table(script_start, all_prs, all_issues) {
             let combined_pr_wait = Duration.fromObject({});
 
             for (const pr of all_prs) {
-                if(pr.draft) {
+                if (one_month_ago < pr.merged && pr.merged < when) {
+                    ++num_merged;
                 }
-                else {
-                    if (one_month_ago < pr.merged && pr.merged < when) {
-                        ++num_merged;
-                    }
 
-                    if (when < pr.opened || pr.closed < when) {
-                        // This PR wasn't active; do nothing.
-                    } else {
-                        ++num_pr;
-                        combined_pr_age = combined_pr_age.plus(when.diff(pr.opened));
-                        combined_pr_wait = combined_pr_wait.plus(calculate_wait(when, pr.opened, pr.reviews));
+                if (when < pr.opened || pr.closed < when) {
+                    // This PR wasn't active; do nothing.
+                } else {
+                    ++num_pr;
+                    if(pr.draft) {
+                    }
+                    else {
+                    combined_pr_age = combined_pr_age.plus(when.diff(pr.opened));
+                    combined_pr_wait = combined_pr_wait.plus(calculate_wait(when, pr.opened, pr.reviews));
                     }
                 }
             }
